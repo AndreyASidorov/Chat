@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <link href="http://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta id="_csrf" name="_csrf" th:content="${_csrf.token}"/>
+    <meta id="_csrf_header" name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <script src="https://cdn.jsdelivr.net/npm/sockjs-client@1/dist/sockjs.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/stomp.js/2.3.3/stomp.min.js"></script>
+    <script th:inline="javascript">
+        /*<![CDATA[*/
+        var principalRole = [[${principalRole}]];
+        var roomId = [[${roomId}]];
+        /*]]>*/
+        window.onload = function () {
+            document.getElementById($('#messageTable tr').last().attr('id')).scrollIntoView(true)
+        }
+    </script>
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('.button-collapse').sideNav({
+                closeOnClick: true
+            });
+        })
+    </script>
+    <style>.scrollTable {
+        height: 500px;
+        display: inline-block;
+        overflow: auto;
+    }</style>
+    <script src="/js/room.js"></script>
+</head>
+
+<body>
+
+<nav>
+    <div class="nav-wrapper">
+        <a href="#" class="brand-logo center">Мои комнаты</a>
+        <ul id="nav-mobile1" class="right hide-on-med-and-down">
+            <li><a href="/logout">Выйти</a>
+                <logout/>
+            </li>
+        </ul>
+        <a href="#" data-activates="slide-out" class="button-collapse"> <i class="material-icons">menu</i></a>
+    </div>
+</nav>
+<ul id="slide-out" class="sidenav">
+
+    <li><a href="#!">Закрыть</a></li>
+    <li><a href="/user">Мой профиль</a></li>
+    <li><a href="/room">Мои комнаты</a></li>
+    <li><a href="/users">Все пользователи</a></li>
+    <li><a href="/logout">Выйти</a><logout/></li>
+</ul>
+<div class="row center" style="width: 1280px;">
+    <div class="row">
+        <div class="col s12">
+            <ul class="tabs">
+                <th:block th:each="room : ${rooms}">
+                    <li class="tab col s2">
+                        <a th:class="${roomId==room.id ? 'active' : ''}" target="_self"
+                           th:href="@{'/room?id='+${room.id}}"
+                           th:text="${room.name}">Test 1</a>
+                    </li>
+                </th:block>
+            </ul>
+        </div>
+    </div>
+    <th:block th:unless="${roomId}">
+        <div class="row">
+            <form class="col s12" th:action="@{/createRoom}" method="post">
+                <div class="row">
+                    <div class="input-field col s3">
+                        <input placeholder="Введите название комнаты" id="roomName" type="text" class="validate"
+                               name="roomName">
+                        <label for="roomName">Создание новой комнаты</label>
+                    </div>
+                    <div class="input-field col s3">
+                        <div class="switch">
+                            <label>
+                                Приватная
+                                <input type="checkbox" name="public" value="true">
+                                <span class="lever"></span>
+                                Публичная
+                            </label>
+                        </div>
+                    </div>
+                    <div class="input-field col s3">
+                        <button class="btn waves-effect waves-light" type="submit" name="action">Создать комнату
+                            <i class="material-icons right">add</i>
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </th:block>
+    <th:block th:if="${roomId}">
+        <div class="row">
+            <table id="messageTable" class="col s9 striped scrollTable">
+                <tbody>
+                <tr th:id="message+${message.id}" th:each="message : ${messageLists}">
+                    <td style="width: 200px"><a th:text="${message.user.userName}" th:href="@{'/user?id='+${message.user.id}}">2.41</a></td>
+                    <td style="width: 700px" th:utext="${message.message}">Onions</td>
+                    <td style="width: 200px" th:text="${message.messageDate}">2.41</td>
+                    <td>
+                        <th:block th:if="${principalRole=='admin' or principalRole=='moderator'}">
+                            <button th:onclick="let newText = prompt('Введите новый текст сообщения', [[${message.message}]]);
+                                                messageEdit(newText, [[${message.id}]])"
+                                    class="right col s1 btn-flat disable" type="submit" name="action">
+                                <i class="material-icons right">edit</i>
+                            </button>
+                        </th:block>
+                    </td>
+                    <td>
+                        <th:block th:if="${principalRole=='admin' or principalRole=='moderator'}">
+                            <button th:onclick="'removeMessage('+${message.id}+','+${roomId}+')'"
+                                    class="right col s1 btn-flat disable" type="submit" name="action">
+                                <i class="material-icons right">backspace</i>
+                            </button>
+                        </th:block>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+            <div>
+
+            </div>
+            <div class="col s3">
+                <a class='row s3 dropdown-button btn' href='#' data-activates='dropdownAction'>Действия с комнатой
+                    <i class="material-icons right">menu</i>
+                </a>
+                <ul class="row s3 collection with-header">
+                    <li class="collection-header">
+                        <h6>В комнате:</h6>
+                    </li>
+                    <a th:href="@{'/user?id='+${owner.id}}" class="collection-item"> <span
+                            th:text="${owner.userName}">owner</span> (владелец)</a>
+                    <th:block th:each="user : ${usersInRoom}">
+                        <div class="row center">
+                            <a th:href="@{'/user?id='+${user.id}}" class="col s9 collection-item"
+                               th:text="${user.userName}">Alvin</a>
+                            <th:block th:if="${principalRole=='admin' or owner.equals(principal)}" class="col s3 collection-item">
+                                <button th:onclick="'removeUser('+${user.id}+','+${roomId}+')'"
+                                        class="right col s1 btn-flat disable" type="submit" name="action">
+                                    <i class="material-icons right">backspace</i>
+                                </button>
+                                <th:block
+                                        th:if="${principalRole=='admin' or principalRole=='moderator'} and ${!bannedUsersinRoom.contains(user)}">
+                                    <form th:action="@{/ban}" method="post">
+                                        <button class="right col s1 btn-flat disable" type="submit"><i
+                                                class="material-icons right">speaker_notes</i></button>
+                                        <input type="hidden" name="userId" th:value="${user.id}">
+                                        <input type="hidden" name="roomId" th:value="${roomId}">
+                                    </form>
+                                </th:block>
+                                <th:block
+                                        th:if="${principalRole=='admin' or principalRole=='moderator'} and ${bannedUsersinRoom.contains(user)}">
+                                    <form th:action="@{/reBan}" method="post">
+                                        <button class="right col s1 btn-flat disable" type="submit"><i
+                                                class="material-icons right">speaker_notes_off</i></button>
+                                        <input type="hidden" name="userId" th:value="${user.id}">
+                                        <input type="hidden" name="roomId" th:value="${roomId}">
+                                    </form>
+                                </th:block>
+                            </th:block>
+                        </div>
+                    </th:block>
+                    <li class="collection-item">
+                    </li>
+                </ul>
+                <th:block th:if="(${!ban})">
+                <a class='row s3 dropdown-button btn' href='#' data-activates='dropdown'>Добавить пользователя
+                    <i class="material-icons right">add</i>
+                </a></th:block>
+            </div>
+            <ul id='dropdown' class='dropdown-content'>
+                <th:block th:each="user : ${otherUsers}">
+                    <li th:onclick="'addUser('+${user.id}+','+${roomId}+')'"><a th:text="${user.userName}">one</a></li>
+                </th:block>
+                <li class="divider" tabindex="-1">Нет доступных пользователей</li>
+                <th:block th:if="${otherUsers.isEmpty}">
+                    <q>Все пользователи добавлены</q>
+                </th:block>
+
+            </ul>
+            <ul id='dropdownAction' class='dropdown-content'>
+                <th:block th:if="${principalRole=='admin' or owner.equals(principal)}">
+                <li th:onclick="'roomRemove('+${roomId}+')'"><a>
+                    <i class="material-icons">delete_forever</i>Удалить комнату</a>
+                </li></th:block>
+                <th:block th:if="${principalRole=='admin' or owner.equals(principal)}">
+                <li th:onclick="'roomRename('+${roomId}+')'">
+                    <a href="#!">
+                        <i class="material-icons">edit</i>Переименовать
+                    </a>
+                </li></th:block>
+                <!--input id="newName" placeholder="Введите новое название" type="text" name="newName" class="validate"-->
+                <li><a href="room"><i class="material-icons">remove</i>Закрыть комнату</a></li>
+                <li th:onclick="'removeUser('+${principal.id}+','+${roomId}+')'"><a href="room"><i class="material-icons">directions_run</i>Покинуть комнату</a></li>
+                <li class="divider" tabindex="-1"></li>
+            </ul>
+        </div>
+        <th:block th:if="(${!ban} and ${userInRoomOrNot}) or (${owner.equals(principal)})">
+            <div class="row">
+                <div class="row left col s9">
+                    <form th:action="@{/messageSend}" method="post">
+                        <div class="row">
+                            <div class="input-field col s10">
+                                <textarea id="textarea1" class="materialize-textarea" name="message"></textarea>
+                                <label for="textarea1">Введите сообщение</label>
+                            </div>
+                            <div class="input-field col s1">
+                                <input type="hidden" name="roomId" th:value="${roomId}">
+                                <button class="btn waves-effect waves-light" type="submit" name="action">Отправить
+                                    <i class="material-icons right">send</i>
+                                </button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </th:block>
+        <th:block th:if="${ban}">
+            <div class="row">
+                <div class="row left col s9">
+                    <h5>Отправка сообщений заблокирована</h5>
+                </div>
+            </div>
+        </th:block>
+        <th:block th:if="${!userInRoomOrNot} and (${!owner.equals(principal)})">
+            <div class="row">
+                <div class="row left col s9">
+                    <h5>Войдите в комнату чтобы писать сообщения</h5>
+                </div>
+            </div>
+        </th:block>
+    </th:block>
+</div>
+</body>
+</html>

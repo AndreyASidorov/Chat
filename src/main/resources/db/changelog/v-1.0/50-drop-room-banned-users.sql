@@ -1,0 +1,1 @@
+DROP TABLE "chat".room_banned_users;

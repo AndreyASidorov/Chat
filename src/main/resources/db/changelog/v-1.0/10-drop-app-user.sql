@@ -1,0 +1,1 @@
+DROP TABLE "chat".app_user;

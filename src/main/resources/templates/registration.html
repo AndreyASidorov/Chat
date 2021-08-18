@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+</head>
+<body>
+
+
+<nav>
+    <div class="nav-wrapper">
+        <a href="#" class="brand-logo center">Регистрация нового пользователя</a>
+        <ul id="nav-mobile" class="left hide-on-med-and-down">
+            <li><a href="login">Войти</a></li>
+        </ul>
+    </div>
+</nav>
+<div class="row center" style="width: 1280px;">
+    <form class="col s12" th:action="@{/registration}" method="post">
+        <div class="row">
+            <div class="input-field col s12">
+                <input placeholder="Введите логин" id="login" type="text" class="validate" name="login">
+                <label for="login">Логин</label>
+            </div>
+            <div class="input-field col s12">
+                <input placeholder="Введите имя пользователя" id="username" type="text" class="validate" name="userName">
+                <label for="username">Имя пользователя</label>
+            </div>
+        </div>
+        <div class="row">
+            <div class="input-field col s12">
+                <input placeholder="Введите пароль" id="password" type="password" class="validate" name="password">
+                <label for="password">Пароль</label>
+            </div>
+        </div>
+        <div class="row center">
+            <button class=" btn waves-effect waves-light" type="submit" name="action">Зарегистрироваться
+                <i class="material-icons right">add</i>
+            </button>
+        </div>
+    </form>
+</div>
+</body>
+</html>

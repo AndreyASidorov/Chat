@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xmlns:th="https://www.thymeleaf.org"
+      xmlns:sec="https://www.thymeleaf.org/thymeleaf-extras-springsecurity3">
+<head>
+    <!--Import Google Icon Font-->
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+    <!--Import materialize.css-->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+    <script type="text/javascript" src="https://code.jquery.com/jquery-2.1.1.min.js"></script>
+    <!--Let browser know website is optimized for mobile-->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <meta id="_csrf" name="_csrf" th:content="${_csrf.token}"/>
+    <meta id="_csrf_header" name="_csrf_header" th:content="${_csrf.headerName}"/>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/0.97.8/js/materialize.min.js"></script>
+
+    <script type="text/javascript">
+        $(document).ready(function(){
+            $('.button-collapse').sideNav({
+                closeOnClick: true
+            });
+        })
+    </script>
+    <script src="/js/user.js"></script>
+</head>
+<body>
+<nav>
+    <div class="nav-wrapper">
+        <a href="#" class="brand-logo center">Пользователь</a>
+        <ul id="nav-mobile" class="right hide-on-med-and-down">
+            <li><a href="login">Выйти</a>
+                <logout/>
+            </li>
+        </ul>
+        <a href="#" data-activates="slide-out" class="button-collapse"> <i class="material-icons">menu</i></a>
+    </div>
+</nav>
+<ul id="slide-out" class="sidenav">
+
+    <li><a href="#!">Закрыть</a></li>
+    <li><a href="/user">Мой профиль</a></li>
+    <li><a href="/room">Мои комнаты</a></li>
+    <li><a href="/users">Все пользователи</a></li>
+    <li><a href="/logout">Выйти</a><logout/></li>
+</ul>
+<div class="row center" style="width: 1280px;">
+    <table class="col striped">
+        <td th:text="${user.login}">2.41</td>
+        <td th:text="${user.userName}">Onions</td>
+        <td th:text="${user.role.userRole}">2.41</td>
+        <td><th:block th:if="${principal.role.userRole=='admin' or user.equals(principal)}">
+            <a class='row s3 dropdown-button btn' href='#' data-activates='dropdownAction'>Действия с пользователем
+                <i class="material-icons right">menu</i>
+            </a></th:block></td>
+    </table>
+</div>
+<ul id='dropdownAction' class='dropdown-content'>
+    <li th:onclick="'rename('+${user.id}+')'">
+        <a href="#!">
+            <i class="material-icons">edit</i>Переименовать
+        </a>
+    </li>
+    <th:block th:if="${principal.role.userRole=='admin'}">
+    <li th:onclick="'makeAdmin('+${user.id}+')'">
+        <a href="#!">
+            <i class="material-icons">edit</i>Назначить администратором
+        </a>
+    </li>
+    <li th:onclick="'makeModer('+${user.id}+')'">
+        <a href="#!">
+            <i class="material-icons">edit</i>Назначить модератором
+        </a>
+    </li>
+    <li th:onclick="'makeUser('+${user.id}+')'">
+        <a href="#!">
+            <i class="material-icons">edit</i>Назначить пользователем
+        </a>
+    </li>
+    <li th:onclick="'removeUser('+${user.id}+')'">
+        <a href="#!">
+            <i class="material-icons">edit</i>Выгнать из всех комнат
+        </a>
+    </li>
+    </th:block>
+</ul>
+</body>
+</html>
